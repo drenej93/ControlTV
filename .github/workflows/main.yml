@@ -25,10 +25,8 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Add Android Platform and Sync
-        run: |
-          npx cap add android
-          npx cap sync android
+      - name: Sync Capacitor Android
+        run: npx cap sync android
 
       - name: Grant execute permission to Gradle wrapper
         run: chmod +x android/gradlew
