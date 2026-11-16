@@ -30,10 +30,12 @@ jobs:
           npx cap add android
           npx cap sync android
 
+      - name: Grant execute permission to Gradle wrapper
+        run: chmod +x android/gradlew
+
       - name: Build Debug APK
         run: |
           cd android
-          chmod +x gradlew
           ./gradlew assembleDebug
 
       - name: Upload APK artifact
