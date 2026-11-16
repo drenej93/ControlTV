@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">SmartTVRemote</string>
+    <string name="title_activity_main">SmartTVRemote</string>
+    <string name="package_name">com.ivan.smarttvremote</string>
+    <string name="custom_url_scheme">com.ivan.smarttvremote</string>
+</resources>
