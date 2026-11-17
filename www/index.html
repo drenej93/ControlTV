@@ -354,14 +354,14 @@
           <div class="screen">
             <div class="settings-card">
               <h2 style="margin-bottom: 10px;">Buscar Televisor</h2>
-              <p style="color: var(--text-muted); font-size: 13px; line-height: 1.5;">Presiona el botón para buscar dispositivos Android TV y Google TV en tu red Wi-Fi local mediante mDNS.</p>
+              <p style="color: var(--text-muted); font-size: 13px; line-height: 1.5;">Presiona el botón para buscar dispositivos Android TV y Google TV en tu red Wi-Fi local.</p>
               
               <button class="scan-submit-btn" onclick="startRealScan()">
-                ${isScanning ? 'Buscando dispositivos...' : 'Escanear Red Wi-Fi'}
+                ${isScanning ? 'Buscando dispositivos reales...' : 'Escanear Red Wi-Fi'}
               </button>
 
               <div class="device-list">
-                ${discoveredDevices.length === 0 ? '<p style="text-align:center; color:var(--text-muted); font-size:13px; margin-top:20px;">No se han encontrado dispositivos todavía. Asegúrate de estar conectado al mismo Wi-Fi que la TV.</p>' : discoveredDevices.map(d => `
+                ${discoveredDevices.length === 0 ? `<p style="text-align:center; color:var(--text-muted); font-size:13px; margin-top:20px;">${isScanning ? 'Escaneando activamente...' : 'No se han detectado dispositivos mDNS todavía. Asegúrate de estar en la misma red Wi-Fi.'}</p>` : discoveredDevices.map(d => `
                   <div class="device-card" onclick="selectDevice('${d.name}', '${d.ip}')">
                     <div>
                       <strong>📺 ${d.name}</strong>
@@ -386,50 +386,52 @@
       `;
     }
 
-    function startRealScan() {
+    async function startRealScan() {
       isScanning = true;
       discoveredDevices = [];
       render();
 
-      // Verificamos si el plugin nativo Zeroconf está disponible en el entorno Android de Capacitor
       try {
-        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Zeroconf) {
-          const zeroconf = window.Capacitor.Plugins.Zeroconf;
-          zeroconf.watch('_googlecast._tcp.local.', 'local.', {
-            // Callback cuando encuentra un dispositivo real en la red
-          }).then(() => {
-            console.log('Iniciado escaneo mDNS');
-          });
+        const { Zeroconf } = window.Capacitor.Plugins;
+        
+        if (!Zeroconf) {
+          throw new Error("Plugin Zeroconf no disponible en este entorno.");
+        }
 
-          zeroconf.addListener('resolved', (data) => {
-            if (data && data.service) {
+        // Limpiar escuchas previas si existen
+        await Zeroconf.removeAllListeners();
+
+        // Escuchar dispositivos resueltos
+        await Zeroconf.addListener('resolved', (result) => {
+          const service = result.service;
+          if (service) {
+            // Evitar duplicados
+            if (!discoveredDevices.some(d => d.ip === service.ipv4)) {
               discoveredDevices.push({
-                name: data.service.name || 'Android TV',
-                ip: data.service.ipv4 || data.service.host || 'IP Local'
+                name: service.name || 'Dispositivo Android TV',
+                ip: service.ipv4 || 'IP Desconocida'
               });
               render();
             }
-          });
+          }
+        });
 
-          // Detener la búsqueda tras 5 segundos y actualizar estado
-          setTimeout(() => {
-            isScanning = false;
-            zeroconf.stop();
-            render();
-          }, 5000);
-        } else {
-          // Si se prueba en navegador web fuera de la app móvil
-          setTimeout(() => {
-            isScanning = false;
-            discoveredDevices = [
-              { name: 'Caixun Smart TV (Simulado)', ip: '192.168.1.X' }
-            ];
-            render();
-          }, 1500);
-        }
+        // Iniciar la búsqueda en el dominio local
+        await Zeroconf.watch({
+          type: '_googlecast._tcp',
+          domain: 'local'
+        });
+
+        // Detener tras 10 segundos
+        setTimeout(async () => {
+          isScanning = false;
+          await Zeroconf.stop({ type: '_googlecast._tcp', domain: 'local' });
+          render();
+        }, 10000);
+
       } catch (e) {
         isScanning = false;
-        alert("Error al iniciar escaneo de red: " + e.message);
+        alert("Error de escaneo nativo: " + e.message);
         render();
       }
     }
@@ -446,7 +448,7 @@
       console.log(`Enviando comando ${cmd} a ${selectedTv}`);
     }
 
-    render();
+    window.onload = () => render();
   </script>
 </body>
 </html>
