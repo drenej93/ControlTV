@@ -356,14 +356,14 @@
           <div class="screen">
             <div class="settings-card">
               <h2 style="margin-bottom: 10px;">Buscar Televisor</h2>
-              <p style="color: var(--text-muted); font-size: 13px; line-height: 1.5;">Escaneo nativo optimizado para Android 10+ en la red Wi-Fi local.</p>
+              <p style="color: var(--text-muted); font-size: 13px; line-height: 1.5;">Búsqueda automática de Smart TVs y Google TVs en tu red Wi-Fi local.</p>
               
-              <button class="scan-submit-btn" onclick="startAndroidScan()">
-                ${isScanning ? 'Escaneando red local...' : 'Escanear Red Wi-Fi'}
+              <button class="scan-submit-btn" onclick="startAutoDiscovery()">
+                ${isScanning ? 'Buscando dispositivos...' : 'Escanear Red Wi-Fi'}
               </button>
 
               <div class="device-list">
-                ${discoveredDevices.length === 0 ? `<p style="text-align:center; color:var(--text-muted); font-size:13px; margin-top:20px;">${isScanning ? 'Buscando Smart TVs activas...' : 'No se han detectado dispositivos todavía. Asegúrate de estar en el mismo Wi-Fi.'}</p>` : discoveredDevices.map(d => `
+                ${discoveredDevices.length === 0 ? `<p style="text-align:center; color:var(--text-muted); font-size:13px; margin-top:20px;">${isScanning ? 'Escaneando la red en segundo plano...' : 'Presiona el botón superior para buscar televisores automáticamente.'}</p>` : discoveredDevices.map(d => `
                   <div class="device-card" onclick="selectDevice('${d.name}', '${d.ip}')">
                     <div>
                       <strong>📺 ${d.name}</strong>
@@ -388,53 +388,48 @@
       `;
     }
 
-    async function startAndroidScan() {
+    async function startAutoDiscovery() {
       if (isScanning) return;
       isScanning = true;
       discoveredDevices = [];
       render();
 
       try {
-        // Barrido rápido y eficiente adaptado para Android 10+
-        // Probamos la IP común de pasarela y subredes locales directas por puerto de Google TV (8008)
-        const commonIps = ['192.168.1.50', '192.168.1.100', '192.168.0.50', '192.168.0.100', '192.168.1.10', '192.168.0.10'];
-        
-        for (let ip of commonIps) {
-          try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 800);
-            
-            const response = await fetch(`http://${ip}:8008/ssdp/device-desc.xml`, {
-              signal: controller.signal,
-              mode: 'no-cors'
-            });
-            clearTimeout(timeoutId);
+        // Barrido automatizado en los rangos comunes del router local para encontrar el Google TV / Android TV
+        const baseIPs = ['192.168.1.', '192.168.0.', '10.0.0.'];
+        let found = false;
 
-            // Si responde, agregamos el Smart TV detectado
-            discoveredDevices.push({
-              name: 'Android TV / Google TV',
-              ip: ip
-            });
-            render();
-          } catch (err) {
-            // Ignoramos IPs sin respuesta
+        for (let prefix of baseIPs) {
+          // Buscamos en las direcciones más comunes de dispositivos caseros (del 1 al 50)
+          let promises = [];
+          for (let i = 1; i <= 40; i++) {
+            let targetIp = prefix + i;
+            promises.push(
+              fetch(`http://${targetIp}:8008/ssdp/device-desc.xml`, {
+                signal: AbortSignal.timeout(600),
+                mode: 'no-cors'
+              }).then(() => {
+                if (!discoveredDevices.some(d => d.ip === targetIp)) {
+                  discoveredDevices.push({
+                    name: 'Google TV / Android TV',
+                    ip: targetIp
+                  });
+                  found = true;
+                  render();
+                }
+              }).catch(() => {})
+            );
           }
+          await Promise.all(promises);
+          if (found) break; // Si ya encontró en la subred activa, terminamos el escaneo
         }
 
-        // Si no se detectó en las comunes, agregamos un selector de IP directa interactivo para vinculación instantánea
-        if (discoveredDevices.length === 0) {
-          const manualIp = prompt("Escaneo de subred completado. Si conoces la IP de tu TV (ej. 192.168.1.X), ingrésala aquí para vincularla:");
-          if (manualIp) {
-            discoveredDevices.push({
-              name: 'Smart TV (Manual)',
-              ip: manualIp.trim()
-            });
-          }
-        }
+        // Si tras el escaneo automático completo no hay resultados directos en el puerto 8008, 
+        // dejamos la lista limpia informando al usuario sin pedir ninguna IP manual
+        isScanning = false;
+        render();
 
       } catch (e) {
-        alert("Error en el escaneo: " + e.message);
-      } finally {
         isScanning = false;
         render();
       }
@@ -443,7 +438,7 @@
     function selectDevice(name, ip) {
       selectedTv = `${name} (${ip})`;
       localStorage.setItem('tv_name', selectedTv);
-      alert(`¡Vinculado exitosamente a ${name} (${ip})!`);
+      alert(`¡Vinculado exitosamente a ${name}!`);
       activeTab = 'remote';
       render();
     }
