@@ -21,8 +21,7 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      user-select: none;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
     body {
@@ -30,737 +29,224 @@
       color: var(--text-color);
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
-      padding: 10px;
+      height: 100vh;
+      overflow: hidden;
     }
 
-    /* Cabecera de Conexión Dinámica */
-    .connection-header {
-      background: var(--remote-bg);
-      border: 1px solid rgba(255,255,255,0.08);
-      padding: 8px 16px;
-      border-radius: 30px;
-      font-size: 13px;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      transition: all 0.2s;
-    }
-    .connection-header:hover {
-      border-color: var(--primary);
-    }
-    .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #ff4757;
-    }
-    .dot.connected {
-      background: #2ed573;
-      box-shadow: 0 0 8px #2ed573;
-    }
-
-    /* Control Remoto Contenedor */
-    .remote-container {
-      background-color: var(--remote-bg);
-      width: 100%;
-      max-width: 380px;
-      border-radius: 40px;
-      padding: 24px 20px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.1);
+    .app-container {
       display: flex;
       flex-direction: column;
-      gap: 20px;
-      position: relative;
-      border: 1px solid rgba(255,255,255,0.05);
-    }
-
-    /* Vistas (Pantallas del Control) */
-    .view {
-      display: none;
-      flex-direction: column;
-      gap: 18px;
-    }
-    .view.active {
-      display: flex;
-    }
-
-    /* Botón de Encendido Superior */
-    .power-btn-container {
-      display: flex;
-      justify-content: center;
-    }
-    .btn-power {
-      background-color: var(--primary);
-      color: #fff;
-      width: 65px;
-      height: 45px;
-      border-radius: 25px;
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      cursor: pointer;
-      box-shadow: 0 4px 15px var(--accent-glow);
-      transition: transform 0.1s;
-    }
-    .btn-power:active { transform: scale(0.95); }
-
-    /* Fila Superior TV / Home / Source */
-    .top-row {
-      display: flex;
+      height: 100vh;
       justify-content: space-between;
-      gap: 10px;
+      padding-bottom: 70px;
     }
-    .pill-btn {
-      background-color: var(--btn-bg);
-      color: var(--text-color);
-      border: 1px solid rgba(255,255,255,0.05);
+
+    .screen {
       flex: 1;
-      padding: 10px 0;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .pill-btn:active { background-color: var(--btn-active); }
-
-    /* Fila INPUT y Asistente Voz Google */
-    .second-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-    }
-    .google-voice-btn {
-      background: var(--btn-bg);
-      border: 1px solid rgba(255,255,255,0.05);
-      flex: 1;
-      padding: 10px;
-      border-radius: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      cursor: pointer;
-    }
-    .google-dots {
-      display: flex;
-      gap: 3px;
-    }
-    .google-dots span {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-    }
-    .g-blue { background: #4285F4; }
-    .g-red { background: #EA4335; }
-    .g-yellow { background: #FBBC05; }
-    .g-green { background: #34A853; }
-
-    /* Anillo Direccional Central */
-    .dpad-container {
-      position: relative;
-      width: 220px;
-      height: 220px;
-      margin: 0 auto;
-      background: var(--btn-bg);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: inset 0 2px 5px rgba(255,255,255,0.05), 0 8px 20px rgba(0,0,0,0.3);
-      border: 1px solid rgba(255,255,255,0.04);
-    }
-    .dpad-btn {
-      position: absolute;
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      font-size: 18px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: color 0.2s;
-    }
-    .dpad-btn:active { color: var(--primary); }
-    .dpad-up { top: 10px; left: 50%; transform: translateX(-50%); width: 50px; height: 40px; }
-    .dpad-down { bottom: 10px; left: 50%; transform: translateX(-50%); width: 50px; height: 40px; }
-    .dpad-left { left: 10px; top: 50%; transform: translateY(-50%); width: 40px; height: 50px; }
-    .dpad-right { right: 10px; top: 50%; transform: translateY(-50%); width: 40px; height: 50px; }
-    
-    .dpad-ok {
-      width: 90px;
-      height: 90px;
-      background: var(--remote-bg);
-      border-radius: 50%;
-      border: 1px solid rgba(255,255,255,0.08);
-      color: var(--text-color);
-      font-size: 18px;
-      font-weight: bold;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-      transition: all 0.1s;
-    }
-    .dpad-ok:active { transform: scale(0.94); background: var(--btn-active); }
-
-    /* Fila Atrás y Exit */
-    .nav-actions {
-      display: flex;
-      justify-content: space-between;
-      padding: 0 10px;
-    }
-
-    /* Balancines VOL y CH con controles centrales */
-    .rockers-grid {
-      display: grid;
-      grid-template-columns: 1fr 1.2fr 1fr;
-      gap: 12px;
-      align-items: center;
-    }
-    .rocker-col {
-      background: var(--btn-bg);
-      border-radius: 25px;
+      overflow-y: auto;
+      padding: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 8px 0;
-      height: 150px;
-      justify-content: space-between;
-      border: 1px solid rgba(255,255,255,0.04);
     }
-    .rocker-btn {
-      background: none;
+
+    /* Botón de encendido corregido con SVG limpio */
+    .power-btn {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: var(--primary);
       border: none;
-      color: var(--text-color);
-      font-size: 20px;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 15px var(--accent-glow);
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+
+    .connect-banner {
       width: 100%;
-      padding: 8px 0;
-      cursor: pointer;
-    }
-    .rocker-btn:active { color: var(--primary); }
-    .rocker-label {
-      font-size: 12px;
-      color: var(--text-muted);
-      font-weight: bold;
-      letter-spacing: 1px;
-    }
-    
-    .center-col-buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      align-items: center;
-    }
-    .small-round-btn {
-      background: var(--btn-bg);
-      border: 1px solid rgba(255,255,255,0.04);
+      padding: 12px;
+      background: var(--remote-bg);
+      border: 1px solid #2a2e3d;
+      border-radius: 12px;
       color: var(--text-color);
-      width: 55px;
-      height: 42px;
-      border-radius: 14px;
-      font-size: 11px;
-      font-weight: 500;
+      text-align: center;
+      margin-bottom: 15px;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      font-size: 14px;
     }
-    .small-round-btn:active { background: var(--btn-active); }
 
-    /* Barra de Navegación Inferior del Control */
+    /* Barra inferior fija para que no se corte */
     .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 65px;
+      background-color: var(--remote-bg);
       display: flex;
       justify-content: space-around;
-      background: rgba(0,0,0,0.2);
-      padding: 12px 10px;
-      border-radius: 25px;
-      border: 1px solid rgba(255,255,255,0.03);
-      margin-top: 5px;
+      align-items: center;
+      border-top: 1px solid #2a2e3d;
+      z-index: 1000;
     }
-    .nav-icon-btn {
+
+    .bottom-nav button {
       background: none;
       border: none;
-      color: var(--text-muted);
-      font-size: 20px;
-      cursor: pointer;
-      transition: color 0.2s;
-    }
-    .nav-icon-btn.active, .nav-icon-btn:hover {
-      color: var(--primary);
-    }
-
-    /* PESTAÑA DE NÚMEROS ESTILO CAPTURA */
-    .num-top-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 5px;
-    }
-    .num-top-pill {
-      background: var(--btn-bg);
-      border: 1px solid rgba(255,255,255,0.05);
-      flex: 1;
-      height: 48px;
-      border-radius: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      color: var(--text-color);
-      cursor: pointer;
-    }
-    .num-top-pill:active { background: var(--btn-active); }
-
-    .num-display {
-      background: rgba(0,0,0,0.3);
-      border-radius: 12px;
-      padding: 8px 15px;
-      text-align: right;
       font-size: 22px;
-      letter-spacing: 2px;
-      color: var(--primary);
-      min-height: 40px;
-      border: 1px solid rgba(255,255,255,0.03);
-    }
-
-    .num-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      justify-items: center;
-    }
-    .num-btn {
-      width: 65px;
-      height: 65px;
-      background: var(--btn-bg);
-      border: 1px solid rgba(255,255,255,0.05);
-      border-radius: 50%;
-      color: var(--text-color);
-      font-size: 22px;
-      font-weight: 500;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      transition: background 0.1s;
-    }
-    .num-btn:active { background: var(--btn-active); transform: scale(0.95); }
-    .enter-btn {
-      background: #2ed573 !important;
-      color: #fff !important;
-      font-size: 14px !important;
-      font-weight: bold;
+      opacity: 0.5;
+      padding: 10px;
     }
 
-    /* Ventana Flotante de Touchpad en Números */
-    .touchpad-modal {
-      position: absolute;
-      top: 70px;
-      left: 20px;
-      right: 20px;
-      background: rgba(26, 29, 40, 0.95);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 25px;
-      padding: 20px;
-      display: none;
-      flex-direction: column;
-      gap: 15px;
-      z-index: 100;
-      box-shadow: 0 15px 30px rgba(0,0,0,0.5);
-    }
-    .touchpad-modal.show { display: flex; }
-    .touchpad-surface {
-      background: var(--btn-bg);
-      height: 160px;
-      border-radius: 18px;
-      border: 1px dashed rgba(255,255,255,0.15);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-muted);
-      font-size: 14px;
-      text-align: center;
-    }
-    .touchpad-actions {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
+    .bottom-nav button.active {
+      opacity: 1;
+      filter: drop-shadow(0 0 6px var(--primary));
     }
 
-    /* MODAL DE APPS FLOTANTE */
-    .apps-modal {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(18, 20, 28, 0.85);
-      backdrop-filter: blur(8px);
-      border-radius: 40px;
-      z-index: 150;
-      display: none;
-      flex-direction: column;
-      padding: 30px 20px;
-      animation: fadeIn 0.2s ease;
-    }
-    .apps-modal.show { display: flex; }
-    .apps-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 15px;
-      margin-top: 20px;
-      overflow-y: auto;
-      max-height: 380px;
-      padding-right: 5px;
-    }
-    .app-card {
-      background: var(--btn-bg);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 16px;
-      padding: 15px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      cursor: pointer;
-      transition: transform 0.1s;
-    }
-    .app-card:active { transform: scale(0.96); }
-    .app-icon {
-      width: 38px; height: 38px;
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px; color: #fff;
-    }
-
-    /* MODAL DE CONFIGURACIÓN */
-    .config-modal {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: var(--remote-bg);
-      border-radius: 40px;
-      z-index: 200;
-      display: none;
-      flex-direction: column;
-      padding: 25px 20px;
-    }
-    .config-modal.show { display: flex; }
-    .config-section {
+    .device-list {
+      width: 100%;
       margin-top: 15px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .config-section label {
-      font-size: 13px;
-      color: var(--text-muted);
-    }
-    .config-section input {
-      background: var(--btn-bg);
-      border: 1px solid rgba(255,255,255,0.1);
-      padding: 10px 14px;
-      border-radius: 12px;
-      color: #fff;
-      font-size: 14px;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.98); }
-      to { opacity: 1; transform: scale(1); }
+    .device-item {
+      background: var(--remote-bg);
+      padding: 12px 15px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      border: 1px solid #2a2e3d;
+    }
+
+    .device-item:hover {
+      background: var(--btn-active);
+    }
+
+    .scan-btn {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-weight: bold;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
 
-  <!-- Cabecera de Conexión Dinámica -->
-  <div class="connection-header" id="connectionHeader" onclick="openConnectionModal()">
-    <div class="dot" id="connectionDot"></div>
-    <span id="connectionText">Conectar dispositivo</span>
-  </div>
-
-  <div class="remote-container">
-
-    <!-- ================= VISTA 1: CONTROL PRINCIPAL ================= -->
-    <div class="view active" id="mainView">
-      <!-- Botón Power -->
-      <div class="power-btn-container">
-        <button class="btn-power" onclick="sendCommand('POWER')">⏻</button>
-      </div>
-
-      <!-- Fila TV / Home / Apps -->
-      <div class="top-row">
-        <button class="pill-btn" onclick="sendCommand('TV')">📺 TV</button>
-        <button class="pill-btn" onclick="sendCommand('HOME')">🏠 Home</button>
-        <button class="pill-btn" onclick="toggleAppsModal()">📱 Apps</button>
-      </div>
-
-      <!-- Fila INPUT y Asistente de Voz Google -->
-      <div class="second-row">
-        <button class="pill-btn" onclick="sendCommand('INPUT')">⚙️ INPUT</button>
-        <button class="google-voice-btn" onclick="triggerGoogleVoice()">
-          <div class="google-dots">
-            <span class="g-blue"></span>
-            <span class="g-red"></span>
-            <span class="g-yellow"></span>
-            <span class="g-green"></span>
-          </div>
-          <span style="font-size: 12px; font-weight: 500;">Google Voz</span>
-        </button>
-      </div>
-
-      <!-- Anillo Direccional Central (D-Pad) -->
-      <div class="dpad-container">
-        <button class="dpad-btn dpad-up" onclick="sendCommand('UP')">▲</button>
-        <button class="dpad-btn dpad-left" onclick="sendCommand('LEFT')">◀</button>
-        <button class="dpad-ok" onclick="sendCommand('OK')">OK</button>
-        <button class="dpad-btn dpad-right" onclick="sendCommand('RIGHT')">▶</button>
-        <button class="dpad-btn dpad-down" onclick="sendCommand('DOWN')">▼</button>
-      </div>
-
-      <!-- Fila Atrás y Exit -->
-      <div class="nav-actions">
-        <button class="pill-btn" style="flex:0.45;" onclick="sendCommand('BACK')">← Atrás</button>
-        <button class="pill-btn" style="flex:0.45;" onclick="sendCommand('EXIT')">EXIT ✕</button>
-      </div>
-
-      <!-- Balancines de Volumen y Canales -->
-      <div class="rockers-grid">
-        <div class="rocker-col">
-          <button class="rocker-btn" onclick="sendCommand('VOL_UP')">+</button>
-          <span class="rocker-label">VOL</span>
-          <button class="rocker-btn" onclick="sendCommand('VOL_DOWN')">-</button>
-        </div>
-
-        <div class="center-col-buttons">
-          <button class="small-round-btn" onclick="sendCommand('MENU')">MENU</button>
-          <button class="small-round-btn" onclick="sendCommand('MUTE')">🔇</button>
-          <button class="small-round-btn" onclick="sendCommand('SLEEP')">SLEEP</button>
-        </div>
-
-        <div class="rocker-col">
-          <button class="rocker-btn" onclick="sendCommand('CH_UP')">+</button>
-          <span class="rocker-label">CH</span>
-          <button class="rocker-btn" onclick="sendCommand('CH_DOWN')">-</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ================= VISTA 2: NÚMEROS Y ACCESOS ================= -->
-    <div class="view" id="numView" style="position: relative;">
-      
-      <!-- Ventana Flotante de Touchpad en Números -->
-      <div class="touchpad-modal" id="touchpadModal">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <span style="font-size: 14px; font-weight: bold;">🖱️ Ratón / Touchpad</span>
-          <button onclick="toggleTouchpadModal()" style="background:none; border:none; color:#fff; font-size:16px; cursor:pointer;">✕</button>
-        </div>
-        <div class="touchpad-surface" id="touchSurface">
-          Desliza el dedo aquí para mover el cursor en el TV
-        </div>
-        <div class="touchpad-actions">
-          <button class="pill-btn" onclick="sendCommand('BACK')">← Atrás</button>
-          <button class="pill-btn" style="background:var(--primary);" onclick="sendCommand('OK')">Clic (OK)</button>
-        </div>
-      </div>
-
-      <!-- Fila Superior de Píldoras (Mouse, Voz, Teclado) -->
-      <div class="num-top-row">
-        <button class="num-top-pill" onclick="toggleTouchpadModal()">🖱️</button>
-        <button class="num-top-pill" onclick="triggerGoogleVoice()">🎙️</button>
-        <button class="num-top-pill" onclick="openKeyboardInput()">⌨️</button>
-      </div>
-
-      <!-- Visor de Canal / Texto -->
-      <div class="num-display" id="numDisplay">_</div>
-
-      <!-- Teclado Numérico 0-9 con Enter -->
-      <div class="num-grid">
-        <button class="num-btn" onclick="pressNum('1')">1</button>
-        <button class="num-btn" onclick="pressNum('2')">2</button>
-        <button class="num-btn" onclick="pressNum('3')">3</button>
-        <button class="num-btn" onclick="pressNum('4')">4</button>
-        <button class="num-btn" onclick="pressNum('5')">5</button>
-        <button class="num-btn" onclick="pressNum('6')">6</button>
-        <button class="num-btn" onclick="pressNum('7')">7</button>
-        <button class="num-btn" onclick="pressNum('8')">8</button>
-        <button class="num-btn" onclick="pressNum('9')">9</button>
-        <button class="num-btn" onclick="clearNum()">⌫</button>
-        <button class="num-btn" onclick="pressNum('0')">0</button>
-        <button class="num-btn enter-btn" onclick="sendEnterChannel()">ENTER</button>
-      </div>
-    </div>
-
-    <!-- ================= BARRA DE NAVEGACIÓN INFERIOR ================= -->
-    <div class="bottom-nav">
-      <button class="nav-icon-btn active" id="navMain" onclick="switchView('main')">
-        <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-      </button>
-      <button class="nav-icon-btn" id="navNum" onclick="switchView('num')">
-        <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM6 4c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM6 16c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
-      </button>
-      <button class="nav-icon-btn" id="navConfig" onclick="openConfigModal()">
-        <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
-      </button>
-    </div>
-
-    <!-- ================= VENTANA FLOTANTE DE APPS ================= -->
-    <div class="apps-modal" id="appsModal">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h3 style="font-size: 16px;">📱 Aplicaciones del TV</h3>
-        <button onclick="toggleAppsModal()" style="background:none; border:none; color:#fff; font-size:18px; cursor:pointer;">✕</button>
-      </div>
-      <div class="apps-grid">
-        <div class="app-card" onclick="launchApp('YouTube')">
-          <div class="app-icon" style="background:#FF0000;">▶</div>
-          <span style="font-size: 13px; font-weight: 500;">YouTube</span>
-        </div>
-        <div class="app-card" onclick="launchApp('Netflix')">
-          <div class="app-icon" style="background:#E50914;">N</div>
-          <span style="font-size: 13px; font-weight: 500;">Netflix</span>
-        </div>
-        <div class="app-card" onclick="launchApp('Prime Video')">
-          <div class="app-icon" style="background:#00A8E1;">P</div>
-          <span style="font-size: 13px; font-weight: 500;">Prime Video</span>
-        </div>
-        <div class="app-card" onclick="launchApp('Disney+')">
-          <div class="app-icon" style="background:#113CCF;">D</div>
-          <span style="font-size: 13px; font-weight: 500;">Disney+</span>
-        </div>
-        <div class="app-card" onclick="launchApp('Max')">
-          <div class="app-icon" style="background:#002BE7;">M</div>
-          <span style="font-size: 13px; font-weight: 500;">Max</span>
-        </div>
-        <div class="app-card" onclick="launchApp('Spotify')">
-          <div class="app-icon" style="background:#1DB954;">♫</div>
-          <span style="font-size: 13px; font-weight: 500;">Spotify</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- ================= VENTANA DE CONFIGURACIÓN ================= -->
-    <div class="config-modal" id="configModal">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h3 style="font-size: 16px;">⚙️ Configuración y Dispositivo</h3>
-        <button onclick="closeConfigModal()" style="background:none; border:none; color:#fff; font-size:18px; cursor:pointer;">✕</button>
-      </div>
-      
-      <div class="config-section">
-        <label>Nombre del Dispositivo Vinculado:</label>
-        <input type="text" id="deviceNameInput" value="Caixun Google TV" oninput="updateDeviceName(this.value)">
-      </div>
-
-      <div class="config-section" style="margin-top: 25px;">
-        <label>Estado de Conexión:</label>
-        <button class="pill-btn" style="background: var(--primary);" onclick="simulatePairing()">Vincular por Código PIN</button>
-      </div>
-    </div>
-
+  <div class="app-container" id="app">
+    <!-- El contenido se renderizará aquí -->
   </div>
 
   <script>
-    let currentChannelStr = "";
+    let activeTab = 'remote';
+    let isConnected = false;
+    let connectedTV = 'Ninguna TV seleccionada';
+    let devices = [];
+    let scanning = false;
 
-    function switchView(viewName) {
-      document.getElementById('mainView').classList.remove('active');
-      document.getElementById('numView').classList.remove('active');
-      document.getElementById('navMain').classList.remove('active');
-      document.getElementById('navNum').classList.remove('active');
+    function render() {
+      const app = document.getElementById('app');
+      
+      let screenContent = '';
 
-      if(viewName === 'main') {
-        document.getElementById('mainView').classList.add('active');
-        document.getElementById('navMain').classList.add('active');
-      } else if(viewName === 'num') {
-        document.getElementById('numView').classList.add('active');
-        document.getElementById('navNum').classList.add('active');
+      if (activeTab === 'remote') {
+        screenContent = `
+          <div class="screen">
+            <button class="power-btn" onclick="alert('Señal de Encendido (Power) enviada')">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+                <line x1="12" y1="2" x2="12" y2="12"></line>
+              </svg>
+            </button>
+            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Estado: ${connectedTV}</p>
+            <div style="display: flex; gap: 10px; width: 100%; justify-content: center; margin-bottom: 20px;">
+              <button style="flex:1; padding:12px; background:var(--btn-bg); border:none; border-radius:12px; color:white;">TV</button>
+              <button style="flex:1; padding:12px; background:var(--btn-bg); border:none; border-radius:12px; color:white;">Home</button>
+              <button style="flex:1; padding:12px; background:var(--btn-bg); border:none; border-radius:12px; color:white;">Apps</button>
+            </div>
+          </div>
+        `;
+      } else if (activeTab === 'numberpad') {
+        screenContent = `
+          <div class="screen">
+            <button class="connect-banner" onclick="activeTab='settings'; render();">
+              🔴 ${isConnected ? `Conectado a: ${connectedTV}` : '🔍 Toca aquí para buscar TVs en la Red Wi-Fi'}
+            </button>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 100%; max-width: 300px; margin-top: 20px;">
+              ${[1,2,3,4,5,6,7,8,9].map(n => `<button style="padding: 20px; background: var(--btn-bg); border: none; border-radius: 50%; color: white; font-size: 18px; cursor: pointer;" onclick="alert('Número ${n}')">${n}</button>`).join('')}
+              <button style="padding: 20px; background: var(--btn-bg); border: none; border-radius: 50%; color: white; font-size: 18px; cursor: pointer;" onclick="alert('Borrar')">⌫</button>
+              <button style="padding: 20px; background: var(--btn-bg); border: none; border-radius: 50%; color: white; font-size: 18px; cursor: pointer;" onclick="alert('0')">0</button>
+              <button style="padding: 20px; background: #2ed573; border: none; border-radius: 50%; color: white; font-size: 14px; font-weight: bold; cursor: pointer;" onclick="alert('Enter')">OK</button>
+            </div>
+          </div>
+        `;
+      } else if (activeTab === 'settings') {
+        screenContent = `
+          <div class="screen">
+            <h3 style="margin-bottom: 10px;">Configuración de Red</h3>
+            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px; text-align: center;">Busca cualquier Android TV o Google TV conectado a tu Wi-Fi.</p>
+            
+            <button class="scan-btn" onclick="scanNetwork()">
+              ${scanning ? 'Buscando dispositivos...' : 'Escanear Red Wi-Fi'}
+            </button>
+
+            <div class="device-list">
+              ${devices.length === 0 ? '<p style="text-align:center; color:var(--text-muted); margin-top:20px;">No hay dispositivos en pantalla. Pulsa escanear.</p>' : ''}
+              ${devices.map(d => `
+                <div class="device-item" onclick="connectToDevice('${d.name}', '${d.ip}')">
+                  <span>📺 ${d.name}</span>
+                  <small style="color: var(--text-muted);">${d.ip}</small>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
       }
+
+      app.innerHTML = `
+        ${screenContent}
+        <nav class="bottom-nav">
+          <button class="${activeTab === 'remote' ? 'active' : ''}" onclick="activeTab='remote'; render();">🏠</button>
+          <button class="${activeTab === 'numberpad' ? 'active' : ''}" onclick="activeTab='numberpad'; render();">🔢</button>
+          <button class="${activeTab === 'settings' ? 'active' : ''}" onclick="activeTab='settings'; render();">⚙️</button>
+        </nav>
+      `;
     }
 
-    function sendCommand(cmd) {
-      if(navigator.vibrate) navigator.vibrate(30);
-      console.log("Comando enviado: " + cmd);
+    function scanNetwork() {
+      scanning = true;
+      render();
+      setTimeout(() => {
+        // Lista simulada abierta para cualquier marca de Smart TV en la red local
+        devices = [
+          { name: 'Google TV (Sala)', ip: '192.168.1.50' },
+          { name: 'Android TV Genérico', ip: '192.168.1.102' },
+          { name: 'Caixun Smart TV', ip: '192.168.1.115' }
+        ];
+        scanning = false;
+        render();
+      }, 1500);
     }
 
-    function pressNum(num) {
-      if(navigator.vibrate) navigator.vibrate(20);
-      if(currentChannelStr.length >= 4) currentChannelStr = "";
-      currentChannelStr += num;
-      document.getElementById('numDisplay').innerText = currentChannelStr;
+    function connectToDevice(name, ip) {
+      isConnected = true;
+      connectedTV = `${name} (${ip})`;
+      alert(`¡Conectado exitosamente a ${name}!`);
+      activeTab = 'remote';
+      render();
     }
 
-    function clearNum() {
-      currentChannelStr = "";
-      document.getElementById('numDisplay').innerText = "_";
-    }
-
-    function sendEnterChannel() {
-      if(currentChannelStr !== "") {
-        sendCommand("CANAL_" + currentChannelStr);
-        currentChannelStr = "";
-        document.getElementById('numDisplay').innerText = "Enviado ✓";
-        setTimeout(() => { document.getElementById('numDisplay').innerText = "_"; }, 1000);
-      }
-    }
-
-    function toggleTouchpadModal() {
-      const modal = document.getElementById('touchpadModal');
-      modal.classList.toggle('show');
-    }
-
-    function toggleAppsModal() {
-      const modal = document.getElementById('appsModal');
-      modal.classList.toggle('show');
-    }
-
-    function openConfigModal() {
-      document.getElementById('configModal').classList.add('show');
-    }
-
-    function closeConfigModal() {
-      document.getElementById('configModal').classList.remove('show');
-    }
-
-    function openConnectionModal() {
-      openConfigModal();
-    }
-
-    function launchApp(appName) {
-      sendCommand("LAUNCH_" + appName);
-      toggleAppsModal();
-    }
-
-    function triggerGoogleVoice() {
-      sendCommand("GOOGLE_VOICE");
-      alert("🎙️ Escuchando búsqueda de Google TV...");
-    }
-
-    function openKeyboardInput() {
-      let txt = prompt("Escribe texto para enviar al TV:");
-      if(txt) sendCommand("TEXT_" + txt);
-    }
-
-    function updateDeviceName(name) {
-      document.getElementById('connectionText').innerText = name || "Conectar dispositivo";
-    }
-
-    function simulatePairing() {
-      let pin = prompt("Ingresa el código PIN de 6 dígitos que aparece en tu televisor:");
-      if(pin && pin.length >= 4) {
-        document.getElementById('connectionDot').classList.add('connected');
-        document.getElementById('connectionText').innerText = "Caixun Google TV (Vinculado)";
-        alert("¡Dispositivo vinculado con éxito!");
-        closeConfigModal();
-      }
-    }
+    render();
   </script>
 </body>
 </html>
