@@ -354,14 +354,14 @@
           <div class="screen">
             <div class="settings-card">
               <h2 style="margin-bottom: 10px;">Buscar Televisor</h2>
-              <p style="color: var(--text-muted); font-size: 13px; line-height: 1.5;">Presiona el botón para buscar dispositivos Android TV y Google TV conectados a tu red Wi-Fi local.</p>
+              <p style="color: var(--text-muted); font-size: 13px; line-height: 1.5;">Escanea tu red Wi-Fi mediante mDNS para detectar tu Smart TV o Google TV real.</p>
               
-              <button class="scan-submit-btn" onclick="startRealScan()">
-                ${isScanning ? 'Buscando en la red local...' : 'Escanear Red Wi-Fi'}
+              <button class="scan-submit-btn" onclick="startZeroconfScan()">
+                ${isScanning ? 'Escaneando red mDNS...' : 'Escanear Red Wi-Fi'}
               </button>
 
               <div class="device-list">
-                ${discoveredDevices.length === 0 ? `<p style="text-align:center; color:var(--text-muted); font-size:13px; margin-top:20px;">${isScanning ? 'Escaneando rangos de red...' : 'No se han encontrado dispositivos todavía. Asegúrate de estar conectado al mismo Wi-Fi que la TV.'}</p>` : discoveredDevices.map(d => `
+                ${discoveredDevices.length === 0 ? `<p style="text-align:center; color:var(--text-muted); font-size:13px; margin-top:20px;">${isScanning ? 'Buscando dispositivos en la red...' : 'No se han encontrado dispositivos todavía. Asegúrate de que el televisor esté encendido en el mismo Wi-Fi.'}</p>` : discoveredDevices.map(d => `
                   <div class="device-card" onclick="selectDevice('${d.name}', '${d.ip}')">
                     <div>
                       <strong>📺 ${d.name}</strong>
@@ -386,30 +386,48 @@
       `;
     }
 
-    async function startRealScan() {
+    async function startZeroconfScan() {
       isScanning = true;
       discoveredDevices = [];
       render();
 
-      // Escaneo activo de red local buscando dispositivos Smart TV / Google TV reales
       try {
-        // Simulamos un barrido inteligente de red local buscando respuestas en puertos comunes de TV (puerto 8008 / 5555)
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        
-        // Si detecta la red, consultamos o dejamos listo para conectar mediante IP ingresada o detectada por DHCP local
-        discoveredDevices = [];
-        
-        // Nota: Si no hay dispositivos anunciándose por mDNS en este rango exacto, 
-        // permitimos un input rápido o mostramos el estado de la red para vinculación directa.
-        isScanning = false;
-        render();
-        
-        if(discoveredDevices.length === 0) {
-          alert("Escaneo finalizado. Si tu TV está encendida en la misma red Wi-Fi y no aparece automáticamente, verifica que el aislamiento de AP esté desactivado en tu router.");
+        const zeroconf = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Zeroconf;
+
+        if (!zeroconf) {
+          throw new Error("Plugin Zeroconf no disponible en el runtime nativo.");
         }
+
+        // Limpiar escuchas previas y registrar eventos reales de mDNS
+        await zeroconf.removeAllListeners();
+
+        zeroconf.addListener('resolved', (data) => {
+          if (data && data.service) {
+            const tvName = data.service.name || 'Android TV';
+            const tvIp = data.service.ipv4 || data.service.host || '';
+            
+            if (tvIp && !discoveredDevices.some(d => d.ip === tvIp)) {
+              discoveredDevices.push({ name: tvName, ip: tvIp });
+              render();
+            }
+          }
+        });
+
+        // Escuchar servicios de Google Cast / Android TV en la red local
+        await zeroconf.watch('_googlecast._tcp.', 'local.');
+
+        // Parar la escucha automática a los 12 segundos
+        setTimeout(async () => {
+          isScanning = false;
+          try {
+            await zeroconf.stop({ type: '_googlecast._tcp.', domain: 'local.' });
+          } catch(err) {}
+          render();
+        }, 12000);
+
       } catch (e) {
         isScanning = false;
-        alert("Error en el escaneo: " + e.message);
+        alert("Error al iniciar Zeroconf: " + e.message);
         render();
       }
     }
@@ -417,13 +435,13 @@
     function selectDevice(name, ip) {
       selectedTv = `${name} (${ip})`;
       localStorage.setItem('tv_name', selectedTv);
-      alert(`¡Vinculado exitosamente a ${name}!`);
+      alert(`¡Vinculado a ${name} (${ip})!`);
       activeTab = 'remote';
       render();
     }
 
     function sendCommand(cmd) {
-      console.log(`Enviando comando ${cmd} al dispositivo ${selectedTv}`);
+      console.log(`Comando ${cmd} enviado a ${selectedTv}`);
     }
 
     window.onload = () => render();
