@@ -47,24 +47,28 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      width: 100%;
     }
 
     .remote-card {
       background-color: var(--remote-bg);
       width: 100%;
-      max-width: 360px;
+      max-width: 400px;
+      flex: 1;
       border-radius: 30px;
       padding: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: space-between;
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
       border: 1px solid rgba(255,255,255,0.05);
+      margin-bottom: 10px;
     }
 
     .power-btn {
-      width: 65px;
-      height: 65px;
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
       background: var(--primary);
       border: none;
@@ -74,14 +78,12 @@
       justify-content: center;
       box-shadow: 0 0 15px var(--accent-glow);
       cursor: pointer;
-      margin-bottom: 12px;
     }
 
     .top-actions {
       display: flex;
       gap: 10px;
       width: 100%;
-      margin-bottom: 15px;
     }
 
     .action-pill {
@@ -91,28 +93,27 @@
       border: none;
       border-radius: 14px;
       color: var(--text-color);
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 500;
       cursor: pointer;
       text-align: center;
     }
 
     .dpad-container {
-      width: 180px;
-      height: 180px;
+      width: 170px;
+      height: 170px;
       background: #151821;
       border-radius: 50%;
       position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 15px 0;
       box-shadow: inset 0 4px 10px rgba(0,0,0,0.6);
     }
 
     .ok-btn {
-      width: 65px;
-      height: 65px;
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
       background: var(--btn-bg);
       border: none;
@@ -128,32 +129,33 @@
       background: transparent;
       border: none;
       color: var(--text-muted);
-      font-size: 14px;
+      font-size: 16px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
+      width: 40px;
+      height: 40px;
     }
 
-    .dpad-up { top: 10px; left: 50%; transform: translateX(-50%); }
-    .dpad-down { bottom: 10px; left: 50%; transform: translateX(-50%); }
-    .dpad-left { left: 12px; top: 50%; transform: translateY(-50%); }
-    .dpad-right { right: 12px; top: 50%; transform: translateY(-50%); }
+    .dpad-up { top: 5px; left: 50%; transform: translateX(-50%); }
+    .dpad-down { bottom: 5px; left: 50%; transform: translateX(-50%); }
+    .dpad-left { left: 5px; top: 50%; transform: translateY(-50%); }
+    .dpad-right { right: 5px; top: 50%; transform: translateY(-50%); }
 
     .middle-nav {
       display: flex;
       justify-content: space-between;
       width: 100%;
-      margin: 10px 0;
     }
 
     .nav-btn {
-      padding: 10px 20px;
+      padding: 12px 20px;
       background: var(--btn-bg);
       border: none;
       border-radius: 14px;
       color: var(--text-muted);
-      font-size: 13px;
+      font-size: 14px;
       cursor: pointer;
     }
 
@@ -162,22 +164,21 @@
       justify-content: space-between;
       width: 100%;
       gap: 12px;
-      margin-top: 10px;
     }
 
     .control-box {
       flex: 1;
       background: var(--btn-bg);
       border-radius: 16px;
-      padding: 12px;
+      padding: 10px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
 
     .control-box span {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-muted);
       font-weight: bold;
     }
@@ -191,6 +192,9 @@
       color: white;
       font-size: 16px;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .bottom-nav {
@@ -210,7 +214,7 @@
     .bottom-nav button {
       background: none;
       border: none;
-      font-size: 22px;
+      font-size: 24px;
       cursor: pointer;
       opacity: 0.5;
       padding: 10px;
@@ -224,36 +228,37 @@
     .settings-card {
       background: var(--remote-bg);
       width: 100%;
-      max-width: 360px;
+      max-width: 400px;
       border-radius: 20px;
-      padding: 20px;
+      padding: 25px;
       border: 1px solid rgba(255,255,255,0.05);
     }
 
     .scan-submit-btn {
       width: 100%;
-      padding: 12px;
+      padding: 15px;
       background: var(--primary);
       color: white;
       border: none;
-      border-radius: 12px;
+      border-radius: 14px;
       font-weight: bold;
+      font-size: 16px;
       cursor: pointer;
-      box-shadow: 0 0 10px var(--accent-glow);
-      margin-top: 15px;
+      box-shadow: 0 0 15px var(--accent-glow);
+      margin-top: 20px;
     }
 
     .device-list {
-      margin-top: 15px;
+      margin-top: 20px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
     }
 
     .device-card {
       background: var(--bg-color);
-      padding: 12px;
-      border-radius: 12px;
+      padding: 15px;
+      border-radius: 14px;
       border: 1px solid #2a2e3d;
       cursor: pointer;
       display: flex;
@@ -286,7 +291,11 @@
                   <line x1="12" y1="2" x2="12" y2="12"></line>
                 </svg>
               </button>
-              <span style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;" onclick="activeTab='settings'; render();">📺 ${selectedTv} (Cambiar)</span>
+              
+              <div style="text-align: center; margin: 5px 0;">
+                <p style="font-size: 12px; color: var(--text-muted);">Dispositivo actual:</p>
+                <p style="font-size: 14px; font-weight: bold; color: var(--text-color); cursor: pointer;" onclick="activeTab='settings'; render();">📺 ${selectedTv} ⚙️</p>
+              </div>
 
               <div class="top-actions">
                 <button class="action-pill" onclick="sendCommand('TV')">TV</button>
@@ -314,9 +323,8 @@
                   <button class="mini-btn" onclick="sendCommand('VOL-')">-</button>
                 </div>
                 <div class="control-box">
-                  <button class="mini-btn" style="margin-bottom:4px;" onclick="sendCommand('MENU')">☰</button>
+                  <button class="mini-btn" style="margin-bottom:2px;" onclick="sendCommand('MENU')">☰</button>
                   <button class="mini-btn" style="background:var(--primary);" onclick="sendCommand('MUTE')">🔇</button>
-                  <span style="font-size:10px; margin-top:4px;">MENU</span>
                 </div>
                 <div class="control-box">
                   <span>CH</span>
@@ -330,13 +338,13 @@
       } else if (activeTab === 'numberpad') {
         content = `
           <div class="screen">
-            <div class="remote-card" style="padding-bottom: 30px;">
-              <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">Teclado Numérico</p>
-              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%;">
-                ${[1,2,3,4,5,6,7,8,9].map(n => `<button style="padding: 18px; background: var(--btn-bg); border: none; border-radius: 50%; color: white; font-size: 18px; cursor: pointer;" onclick="sendCommand('${n}')">${n}</button>`).join('')}
-                <button style="padding: 18px; background: var(--btn-bg); border: none; border-radius: 50%; color: white; font-size: 16px; cursor: pointer;" onclick="sendCommand('BACKSPACE')">⌫</button>
-                <button style="padding: 18px; background: var(--btn-bg); border: none; border-radius: 50%; color: white; font-size: 18px; cursor: pointer;" onclick="sendCommand('0')">0</button>
-                <button style="padding: 18px; background: #2ed573; border: none; border-radius: 50%; color: white; font-size: 14px; font-weight: bold; cursor: pointer;" onclick="sendCommand('ENTER')">OK</button>
+            <div class="remote-card" style="padding-bottom: 30px; justify-content: center;">
+              <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 15px; text-align: center;">Teclado Numérico Directo</p>
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 100%; max-width: 320px;">
+                ${[1,2,3,4,5,6,7,8,9].map(n => `<button style="padding: 18px; background: var(--btn-bg); border: none; border-radius: 50%; color: white; font-size: 20px; font-weight: bold; cursor: pointer;" onclick="sendCommand('${n}')">${n}</button>`).join('')}
+                <button style="padding: 18px; background: var(--btn-bg); border: none; border-radius: 50%; color: white; font-size: 18px; cursor: pointer;" onclick="sendCommand('BACKSPACE')">⌫</button>
+                <button style="padding: 18px; background: var(--btn-bg); border: none; border-radius: 50%; color: white; font-size: 20px; font-weight: bold; cursor: pointer;" onclick="sendCommand('0')">0</button>
+                <button style="padding: 18px; background: #2ed573; border: none; border-radius: 50%; color: white; font-size: 16px; font-weight: bold; cursor: pointer;" onclick="sendCommand('ENTER')">OK</button>
               </div>
             </div>
           </div>
@@ -345,18 +353,21 @@
         content = `
           <div class="screen">
             <div class="settings-card">
-              <h3 style="margin-bottom: 8px;">Buscar Televisor</h3>
-              <p style="color: var(--text-muted); font-size: 12px; line-height: 1.4;">Presiona el botón para buscar automáticamente dispositivos Android TV o Google TV conectados a tu red Wi-Fi local.</p>
+              <h2 style="margin-bottom: 10px;">Buscar Televisor</h2>
+              <p style="color: var(--text-muted); font-size: 13px; line-height: 1.5;">Presiona el botón para buscar dispositivos Android TV y Google TV en tu red Wi-Fi local mediante mDNS.</p>
               
-              <button class="scan-submit-btn" onclick="startNetworkScan()">
-                ${isScanning ? 'Buscando en la red...' : 'Escanear Red Wi-Fi'}
+              <button class="scan-submit-btn" onclick="startRealScan()">
+                ${isScanning ? 'Buscando dispositivos...' : 'Escanear Red Wi-Fi'}
               </button>
 
-              <div class="device-list" id="deviceListContainer">
-                ${discoveredDevices.length === 0 ? '<p style="text-align:center; color:var(--text-muted); font-size:12px; margin-top:15px;">No hay dispositivos detectados aún.</p>' : discoveredDevices.map(d => `
-                  <div class="device-card" onclick="selectDevice('${d.name}')">
-                    <span>📺 ${d.name}</span>
-                    <small style="color: var(--primary);">${d.ip}</small>
+              <div class="device-list">
+                ${discoveredDevices.length === 0 ? '<p style="text-align:center; color:var(--text-muted); font-size:13px; margin-top:20px;">No se han encontrado dispositivos todavía. Asegúrate de estar conectado al mismo Wi-Fi que la TV.</p>' : discoveredDevices.map(d => `
+                  <div class="device-card" onclick="selectDevice('${d.name}', '${d.ip}')">
+                    <div>
+                      <strong>📺 ${d.name}</strong>
+                      <div style="font-size: 12px; color: var(--text-muted);">${d.ip}</div>
+                    </div>
+                    <span style="color: var(--primary); font-weight: bold;">Conectar</span>
                   </div>
                 `).join('')}
               </div>
@@ -375,32 +386,64 @@
       `;
     }
 
-    function startNetworkScan() {
+    function startRealScan() {
       isScanning = true;
+      discoveredDevices = [];
       render();
-      
-      // Intentar conectarse a la interfaz de red local o ejecutar descubrimiento mDNS/SSDP nativo vía Capacitor
-      setTimeout(() => {
-        // En una app móvil compilada con Capacitor, aquí realizamos el escaneo de puertos de la red local (ej. puertos de Android TV 6466 / 5555)
-        // Simulamos la detección basada en respuesta real de puertos activos de la red del usuario:
-        discoveredDevices = [
-          { name: 'Smart TV Encontrada (Android TV)', ip: 'Red Local Detectada' }
-        ];
+
+      // Verificamos si el plugin nativo Zeroconf está disponible en el entorno Android de Capacitor
+      try {
+        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Zeroconf) {
+          const zeroconf = window.Capacitor.Plugins.Zeroconf;
+          zeroconf.watch('_googlecast._tcp.local.', 'local.', {
+            // Callback cuando encuentra un dispositivo real en la red
+          }).then(() => {
+            console.log('Iniciado escaneo mDNS');
+          });
+
+          zeroconf.addListener('resolved', (data) => {
+            if (data && data.service) {
+              discoveredDevices.push({
+                name: data.service.name || 'Android TV',
+                ip: data.service.ipv4 || data.service.host || 'IP Local'
+              });
+              render();
+            }
+          });
+
+          // Detener la búsqueda tras 5 segundos y actualizar estado
+          setTimeout(() => {
+            isScanning = false;
+            zeroconf.stop();
+            render();
+          }, 5000);
+        } else {
+          // Si se prueba en navegador web fuera de la app móvil
+          setTimeout(() => {
+            isScanning = false;
+            discoveredDevices = [
+              { name: 'Caixun Smart TV (Simulado)', ip: '192.168.1.X' }
+            ];
+            render();
+          }, 1500);
+        }
+      } catch (e) {
         isScanning = false;
+        alert("Error al iniciar escaneo de red: " + e.message);
         render();
-      }, 2000);
+      }
     }
 
-    function selectDevice(name) {
-      selectedTv = name;
+    function selectDevice(name, ip) {
+      selectedTv = `${name} (${ip})`;
       localStorage.setItem('tv_name', selectedTv);
-      alert(`¡Televisor vinculado correctamente: ${name}!`);
+      alert(`¡Vinculado exitosamente a ${name}!`);
       activeTab = 'remote';
       render();
     }
 
     function sendCommand(cmd) {
-      console.log(`Enviando comando ${cmd} al dispositivo ${selectedTv}`);
+      console.log(`Enviando comando ${cmd} a ${selectedTv}`);
     }
 
     render();
