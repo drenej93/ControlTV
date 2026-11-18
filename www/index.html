@@ -278,6 +278,7 @@
     let selectedTv = localStorage.getItem('tv_name') || 'Ningún televisor vinculado';
     let discoveredDevices = [];
     let isScanning = false;
+    let scanStatusMsg = 'Presiona el botón superior para buscar televisores automáticamente.';
 
     function render() {
       const app = document.getElementById('app');
@@ -363,7 +364,7 @@
               </button>
 
               <div class="device-list">
-                ${discoveredDevices.length === 0 ? `<p style="text-align:center; color:var(--text-muted); font-size:13px; margin-top:20px;">${isScanning ? 'Escaneando la red en segundo plano...' : 'Presiona el botón superior para buscar televisores automáticamente.'}</p>` : discoveredDevices.map(d => `
+                ${discoveredDevices.length === 0 ? `<p style="text-align:center; color:var(--text-muted); font-size:13px; margin-top:20px;">${scanStatusMsg}</p>` : discoveredDevices.map(d => `
                   <div class="device-card" onclick="selectDevice('${d.name}', '${d.ip}')">
                     <div>
                       <strong>📺 ${d.name}</strong>
@@ -388,56 +389,66 @@
       `;
     }
 
-    async function startAutoDiscovery() {
+    function startAutoDiscovery() {
       if (isScanning) return;
       isScanning = true;
       discoveredDevices = [];
+      scanStatusMsg = 'Escaneando red Wi-Fi (mDNS)...';
       render();
 
-      try {
-        // Barrido automatizado en los rangos comunes del router local para encontrar el Google TV / Android TV
-        const baseIPs = ['192.168.1.', '192.168.0.', '10.0.0.'];
-        let found = false;
+      const zeroconf = window.cordova && window.cordova.plugins && window.cordova.plugins.zeroconf;
 
-        for (let prefix of baseIPs) {
-          // Buscamos en las direcciones más comunes de dispositivos caseros (del 1 al 50)
-          let promises = [];
-          for (let i = 1; i <= 40; i++) {
-            let targetIp = prefix + i;
-            promises.push(
-              fetch(`http://${targetIp}:8008/ssdp/device-desc.xml`, {
-                signal: AbortSignal.timeout(600),
-                mode: 'no-cors'
-              }).then(() => {
-                if (!discoveredDevices.some(d => d.ip === targetIp)) {
-                  discoveredDevices.push({
-                    name: 'Google TV / Android TV',
-                    ip: targetIp
-                  });
-                  found = true;
-                  render();
-                }
-              }).catch(() => {})
-            );
-          }
-          await Promise.all(promises);
-          if (found) break; // Si ya encontró en la subred activa, terminamos el escaneo
-        }
-
-        // Si tras el escaneo automático completo no hay resultados directos en el puerto 8008, 
-        // dejamos la lista limpia informando al usuario sin pedir ninguna IP manual
+      if (!zeroconf) {
         isScanning = false;
+        scanStatusMsg = 'Error: El escáner nativo no cargó en este dispositivo.';
         render();
-
-      } catch (e) {
-        isScanning = false;
-        render();
+        return;
       }
+
+      const servicesToWatch = [
+        '_googlecast._tcp.',
+        '_androidtvremote2._tcp.',
+        '_airplay._tcp.',
+        '_amzn-wplay._tcp.'
+      ];
+
+      servicesToWatch.forEach(type => {
+        zeroconf.watch(type, 'local.', function(result) {
+          if (result.action === 'resolved' && result.service) {
+            const srv = result.service;
+            const ip = (srv.ipv4Addresses && srv.ipv4Addresses[0]) || (srv.ipv6Addresses && srv.ipv6Addresses[0]);
+            const friendlyName = (srv.txtRecord && (srv.txtRecord.fn || srv.txtRecord.md)) || srv.name || 'Smart TV';
+
+            if (ip && !discoveredDevices.some(d => d.ip === ip)) {
+              discoveredDevices.push({
+                name: friendlyName,
+                ip: ip
+              });
+              render();
+            }
+          }
+        }, function(err) {
+          console.error('Error Zeroconf:', err);
+        });
+      });
+
+      // Detener el escaneo automáticamente después de 8 segundos
+      setTimeout(() => {
+        servicesToWatch.forEach(type => {
+          try { zeroconf.unwatch(type, 'local.'); } catch(e) {}
+        });
+        isScanning = false;
+        if (discoveredDevices.length === 0) {
+          scanStatusMsg = 'No se encontraron televisores. Asegúrate de que el TV y el celular estén en el mismo Wi-Fi.';
+        }
+        render();
+      }, 8000);
     }
 
     function selectDevice(name, ip) {
       selectedTv = `${name} (${ip})`;
       localStorage.setItem('tv_name', selectedTv);
+      localStorage.setItem('tv_ip', ip);
       alert(`¡Vinculado exitosamente a ${name}!`);
       activeTab = 'remote';
       render();
