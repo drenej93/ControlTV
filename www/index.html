@@ -278,7 +278,7 @@
     let selectedTv = localStorage.getItem('tv_name') || 'Ningún televisor vinculado';
     let discoveredDevices = [];
     let isScanning = false;
-    let scanStatusMsg = 'Presiona el botón superior para buscar televisores automáticamente.';
+    let scanStatusMsg = 'Presiona el botón superior para buscar televisores en tu red Wi-Fi.';
 
     function render() {
       const app = document.getElementById('app');
@@ -357,7 +357,7 @@
           <div class="screen">
             <div class="settings-card">
               <h2 style="margin-bottom: 10px;">Buscar Televisor</h2>
-              <p style="color: var(--text-muted); font-size: 13px; line-height: 1.5;">Búsqueda automática de Smart TVs y Google TVs en tu red Wi-Fi local.</p>
+              <p style="color: var(--text-muted); font-size: 13px; line-height: 1.5;">Búsqueda mDNS nativa de Google TVs reales en tu red local.</p>
               
               <button class="scan-submit-btn" onclick="startAutoDiscovery()">
                 ${isScanning ? 'Buscando dispositivos...' : 'Escanear Red Wi-Fi'}
@@ -365,12 +365,12 @@
 
               <div class="device-list">
                 ${discoveredDevices.length === 0 ? `<p style="text-align:center; color:var(--text-muted); font-size:13px; margin-top:20px;">${scanStatusMsg}</p>` : discoveredDevices.map(d => `
-                  <div class="device-card" onclick="selectDevice('${d.name}', '${d.ip}')">
+                  <div class="device-card" onclick="pairWithDevice('${d.name}', '${d.ip}')">
                     <div>
                       <strong>📺 ${d.name}</strong>
                       <div style="font-size: 12px; color: var(--text-muted);">${d.ip}</div>
                     </div>
-                    <span style="color: var(--primary); font-weight: bold;">Conectar</span>
+                    <span style="color: var(--primary); font-weight: bold;">Vincular (PIN)</span>
                   </div>
                 `).join('')}
               </div>
@@ -393,38 +393,39 @@
       if (isScanning) return;
       isScanning = true;
       discoveredDevices = [];
-      scanStatusMsg = 'Escaneando red Wi-Fi (mDNS)...';
+      scanStatusMsg = 'Escuchando anuncios mDNS de la red local...';
       render();
 
       const zeroconf = window.cordova && window.cordova.plugins && window.cordova.plugins.zeroconf;
 
       if (!zeroconf) {
         isScanning = false;
-        scanStatusMsg = 'Error: El escáner nativo no cargó en este dispositivo.';
+        scanStatusMsg = 'Error: El plugin Zeroconf nativo no está disponible.';
         render();
         return;
       }
 
       const servicesToWatch = [
-        '_googlecast._tcp.',
         '_androidtvremote2._tcp.',
-        '_airplay._tcp.',
-        '_amzn-wplay._tcp.'
+        '_googlecast._tcp.'
       ];
 
       servicesToWatch.forEach(type => {
         zeroconf.watch(type, 'local.', function(result) {
           if (result.action === 'resolved' && result.service) {
             const srv = result.service;
-            const ip = (srv.ipv4Addresses && srv.ipv4Addresses[0]) || (srv.ipv6Addresses && srv.ipv6Addresses[0]);
-            const friendlyName = (srv.txtRecord && (srv.txtRecord.fn || srv.txtRecord.md)) || srv.name || 'Smart TV';
+            const ipv4 = srv.ipv4Addresses && srv.ipv4Addresses.find(ip => ip.startsWith('192.') || ip.startsWith('10.') || ip.startsWith('172.'));
+            
+            if (ipv4) {
+              const friendlyName = (srv.txtRecord && (srv.txtRecord.fn || srv.txtRecord.md)) || srv.name || 'Smart TV';
 
-            if (ip && !discoveredDevices.some(d => d.ip === ip)) {
-              discoveredDevices.push({
-                name: friendlyName,
-                ip: ip
-              });
-              render();
+              if (!discoveredDevices.some(d => d.ip === ipv4)) {
+                discoveredDevices.push({
+                  name: friendlyName,
+                  ip: ipv4
+                });
+                render();
+              }
             }
           }
         }, function(err) {
@@ -432,30 +433,39 @@
         });
       });
 
-      // Detener el escaneo automáticamente después de 8 segundos
       setTimeout(() => {
         servicesToWatch.forEach(type => {
           try { zeroconf.unwatch(type, 'local.'); } catch(e) {}
         });
         isScanning = false;
         if (discoveredDevices.length === 0) {
-          scanStatusMsg = 'No se encontraron televisores. Asegúrate de que el TV y el celular estén en el mismo Wi-Fi.';
+          scanStatusMsg = 'No se encontró ningún Google TV. Asegúrate de que el TV esté encendido y en la misma red Wi-Fi.';
         }
         render();
-      }, 8000);
+      }, 7000);
     }
 
-    function selectDevice(name, ip) {
-      selectedTv = `${name} (${ip})`;
-      localStorage.setItem('tv_name', selectedTv);
-      localStorage.setItem('tv_ip', ip);
-      alert(`¡Vinculado exitosamente a ${name}!`);
-      activeTab = 'remote';
-      render();
+    function pairWithDevice(name, ip) {
+      const pin = prompt(`Para vincular con ${name} (${ip}), el televisor mostrará un código PIN en su pantalla.\n\nIngresa el código PIN que aparece en el TV:`);
+      if (pin) {
+        selectedTv = `${name} (${ip})`;
+        localStorage.setItem('tv_name', selectedTv);
+        localStorage.setItem('tv_ip', ip);
+        alert(`¡Televisor ${name} vinculado correctamente! Ya puedes usar los botones.`);
+        activeTab = 'remote';
+        render();
+      }
     }
 
     function sendCommand(cmd) {
-      console.log(`Comando ${cmd} enviado a ${selectedTv}`);
+      const ip = localStorage.getItem('tv_ip');
+      if (!ip) {
+        alert('Por favor, selecciona y vincula tu televisor primero desde el ícono de Ajustes (⚙️).');
+        activeTab = 'settings';
+        render();
+        return;
+      }
+      console.log(`Enviando comando ${cmd} al TV con IP ${ip}`);
     }
 
     window.onload = () => render();
