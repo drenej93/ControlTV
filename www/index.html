@@ -245,7 +245,19 @@
       font-size: 16px;
       cursor: pointer;
       box-shadow: 0 0 15px var(--accent-glow);
-      margin-top: 20px;
+      margin-top: 15px;
+    }
+
+    .reset-btn {
+      width: 100%;
+      padding: 10px;
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid #2a2e3d;
+      border-radius: 14px;
+      font-size: 13px;
+      cursor: pointer;
+      margin-top: 10px;
     }
 
     .device-list {
@@ -278,7 +290,7 @@
     let selectedTv = localStorage.getItem('tv_name') || 'Ningún televisor vinculado';
     let discoveredDevices = [];
     let isScanning = false;
-    let scanStatusMsg = 'Presiona el botón para buscar tu Smart TV automáticamente.';
+    let scanStatusMsg = 'Presiona el botón para buscar tu Smart TV en la red Wi-Fi.';
 
     function render() {
       const app = document.getElementById('app');
@@ -357,10 +369,14 @@
           <div class="screen">
             <div class="settings-card">
               <h2 style="margin-bottom: 10px;">Buscar Smart TV</h2>
-              <p style="color: var(--text-muted); font-size: 13px; line-height: 1.5;">Búsqueda automática en la red Wi-Fi local.</p>
+              <p style="color: var(--text-muted); font-size: 13px; line-height: 1.5;">Búsqueda automática de dispositivos reales en tu red local.</p>
               
               <button class="scan-submit-btn" onclick="startAutoDiscovery()">
                 ${isScanning ? 'Buscando dispositivos...' : 'Escanear Red Wi-Fi'}
+              </button>
+
+              <button class="reset-btn" onclick="resetStoredTv()">
+                Olvidar dispositivo actual
               </button>
 
               <div class="device-list">
@@ -393,56 +409,61 @@
       if (isScanning) return;
       isScanning = true;
       discoveredDevices = [];
-      scanStatusMsg = 'Buscando televisores en la red local...';
+      scanStatusMsg = 'Buscando Smart TVs en la red...';
       render();
 
       const zeroconf = window.cordova && window.cordova.plugins && window.cordova.plugins.zeroconf;
 
       if (!zeroconf) {
         isScanning = false;
-        scanStatusMsg = 'Error: El módulo de red local no está disponible.';
+        scanStatusMsg = 'Error: El módulo mDNS no está disponible.';
         render();
         return;
       }
 
-      // Escuchamos exclusivamente el protocolo oficial de control remoto de Android TV
-      const serviceType = '_androidtvremote2._tcp.';
+      // Escuchamos servicios de Google TV / Android TV
+      const servicesToWatch = [
+        '_androidtvremote2._tcp.',
+        '_googlecast._tcp.'
+      ];
 
-      zeroconf.watch(serviceType, 'local.', function(result) {
-        if (result.action === 'resolved' && result.service) {
-          const srv = result.service;
-          const ipv4 = srv.ipv4Addresses && srv.ipv4Addresses.find(ip => ip.startsWith('192.') || ip.startsWith('10.') || ip.startsWith('172.'));
-          
-          if (ipv4) {
-            // Extraemos el nombre real que el televisor transmite por mDNS
-            const tvName = (srv.txtRecord && srv.txtRecord.fn) || srv.name || 'Android TV';
+      servicesToWatch.forEach(type => {
+        zeroconf.watch(type, 'local.', function(result) {
+          if (result.action === 'resolved' && result.service) {
+            const srv = result.service;
+            const ipv4 = srv.ipv4Addresses && srv.ipv4Addresses.find(ip => ip.startsWith('192.') || ip.startsWith('10.') || ip.startsWith('172.'));
+            
+            if (ipv4) {
+              const tvName = (srv.txtRecord && srv.txtRecord.fn) || srv.name || 'Smart TV';
 
-            if (!discoveredDevices.some(d => d.ip === ipv4)) {
-              discoveredDevices.push({
-                name: tvName,
-                ip: ipv4
-              });
-              render();
+              if (!discoveredDevices.some(d => d.ip === ipv4)) {
+                discoveredDevices.push({
+                  name: tvName,
+                  ip: ipv4
+                });
+                render();
+              }
             }
           }
-        }
-      }, function(err) {
-        console.error('Error en mDNS:', err);
+        }, function(err) {
+          console.error('Error mDNS:', err);
+        });
       });
 
-      // Detenemos la búsqueda automáticamente a los 8 segundos
       setTimeout(() => {
-        try { zeroconf.unwatch(serviceType, 'local.'); } catch(e) {}
+        servicesToWatch.forEach(type => {
+          try { zeroconf.unwatch(type, 'local.'); } catch(e) {}
+        });
         isScanning = false;
         if (discoveredDevices.length === 0) {
-          scanStatusMsg = 'No se encontró ningún Smart TV. Verifica que tu TV esté encendido y conectado a la misma red Wi-Fi.';
+          scanStatusMsg = 'No se encontró ningún Smart TV. Asegúrate de que el televisor esté encendido y conectado al mismo Wi-Fi.';
         }
         render();
       }, 8000);
     }
 
     function pairWithDevice(name, ip) {
-      const pin = prompt(`Para vincular con "${name}" (${ip}), el televisor mostrará un código PIN en su pantalla.\n\nIngresa el código PIN que aparece en el TV:`);
+      const pin = prompt(`Para vincular con "${name}" (${ip}), ingresa el PIN que aparece en la pantalla de tu televisor:`);
       if (pin) {
         selectedTv = `${name} (${ip})`;
         localStorage.setItem('tv_name', selectedTv);
@@ -451,6 +472,15 @@
         activeTab = 'remote';
         render();
       }
+    }
+
+    function resetStoredTv() {
+      localStorage.removeItem('tv_name');
+      localStorage.removeItem('tv_ip');
+      selectedTv = 'Ningún televisor vinculado';
+      discoveredDevices = [];
+      alert('Se ha borrado el televisor guardado.');
+      render();
     }
 
     function sendCommand(cmd) {
