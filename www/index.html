@@ -278,7 +278,7 @@
     let selectedTv = localStorage.getItem('tv_name') || 'Ningún televisor vinculado';
     let discoveredDevices = [];
     let isScanning = false;
-    let scanStatusMsg = 'Presiona el botón superior para buscar televisores en tu red Wi-Fi.';
+    let scanStatusMsg = 'Presiona el botón para buscar tu Smart TV automáticamente.';
 
     function render() {
       const app = document.getElementById('app');
@@ -356,8 +356,8 @@
         content = `
           <div class="screen">
             <div class="settings-card">
-              <h2 style="margin-bottom: 10px;">Buscar Televisor</h2>
-              <p style="color: var(--text-muted); font-size: 13px; line-height: 1.5;">Búsqueda mDNS nativa de Google TVs reales en tu red local.</p>
+              <h2 style="margin-bottom: 10px;">Buscar Smart TV</h2>
+              <p style="color: var(--text-muted); font-size: 13px; line-height: 1.5;">Búsqueda automática en la red Wi-Fi local.</p>
               
               <button class="scan-submit-btn" onclick="startAutoDiscovery()">
                 ${isScanning ? 'Buscando dispositivos...' : 'Escanear Red Wi-Fi'}
@@ -370,7 +370,7 @@
                       <strong>📺 ${d.name}</strong>
                       <div style="font-size: 12px; color: var(--text-muted);">${d.ip}</div>
                     </div>
-                    <span style="color: var(--primary); font-weight: bold;">Vincular (PIN)</span>
+                    <span style="color: var(--primary); font-weight: bold;">Conectar</span>
                   </div>
                 `).join('')}
               </div>
@@ -393,65 +393,61 @@
       if (isScanning) return;
       isScanning = true;
       discoveredDevices = [];
-      scanStatusMsg = 'Escuchando anuncios mDNS de la red local...';
+      scanStatusMsg = 'Buscando televisores en la red local...';
       render();
 
       const zeroconf = window.cordova && window.cordova.plugins && window.cordova.plugins.zeroconf;
 
       if (!zeroconf) {
         isScanning = false;
-        scanStatusMsg = 'Error: El plugin Zeroconf nativo no está disponible.';
+        scanStatusMsg = 'Error: El módulo de red local no está disponible.';
         render();
         return;
       }
 
-      const servicesToWatch = [
-        '_androidtvremote2._tcp.',
-        '_googlecast._tcp.'
-      ];
+      // Escuchamos exclusivamente el protocolo oficial de control remoto de Android TV
+      const serviceType = '_androidtvremote2._tcp.';
 
-      servicesToWatch.forEach(type => {
-        zeroconf.watch(type, 'local.', function(result) {
-          if (result.action === 'resolved' && result.service) {
-            const srv = result.service;
-            const ipv4 = srv.ipv4Addresses && srv.ipv4Addresses.find(ip => ip.startsWith('192.') || ip.startsWith('10.') || ip.startsWith('172.'));
-            
-            if (ipv4) {
-              const friendlyName = (srv.txtRecord && (srv.txtRecord.fn || srv.txtRecord.md)) || srv.name || 'Smart TV';
+      zeroconf.watch(serviceType, 'local.', function(result) {
+        if (result.action === 'resolved' && result.service) {
+          const srv = result.service;
+          const ipv4 = srv.ipv4Addresses && srv.ipv4Addresses.find(ip => ip.startsWith('192.') || ip.startsWith('10.') || ip.startsWith('172.'));
+          
+          if (ipv4) {
+            // Extraemos el nombre real que el televisor transmite por mDNS
+            const tvName = (srv.txtRecord && srv.txtRecord.fn) || srv.name || 'Android TV';
 
-              if (!discoveredDevices.some(d => d.ip === ipv4)) {
-                discoveredDevices.push({
-                  name: friendlyName,
-                  ip: ipv4
-                });
-                render();
-              }
+            if (!discoveredDevices.some(d => d.ip === ipv4)) {
+              discoveredDevices.push({
+                name: tvName,
+                ip: ipv4
+              });
+              render();
             }
           }
-        }, function(err) {
-          console.error('Error Zeroconf:', err);
-        });
+        }
+      }, function(err) {
+        console.error('Error en mDNS:', err);
       });
 
+      // Detenemos la búsqueda automáticamente a los 8 segundos
       setTimeout(() => {
-        servicesToWatch.forEach(type => {
-          try { zeroconf.unwatch(type, 'local.'); } catch(e) {}
-        });
+        try { zeroconf.unwatch(serviceType, 'local.'); } catch(e) {}
         isScanning = false;
         if (discoveredDevices.length === 0) {
-          scanStatusMsg = 'No se encontró ningún Google TV. Asegúrate de que el TV esté encendido y en la misma red Wi-Fi.';
+          scanStatusMsg = 'No se encontró ningún Smart TV. Verifica que tu TV esté encendido y conectado a la misma red Wi-Fi.';
         }
         render();
-      }, 7000);
+      }, 8000);
     }
 
     function pairWithDevice(name, ip) {
-      const pin = prompt(`Para vincular con ${name} (${ip}), el televisor mostrará un código PIN en su pantalla.\n\nIngresa el código PIN que aparece en el TV:`);
+      const pin = prompt(`Para vincular con "${name}" (${ip}), el televisor mostrará un código PIN en su pantalla.\n\nIngresa el código PIN que aparece en el TV:`);
       if (pin) {
         selectedTv = `${name} (${ip})`;
         localStorage.setItem('tv_name', selectedTv);
         localStorage.setItem('tv_ip', ip);
-        alert(`¡Televisor ${name} vinculado correctamente! Ya puedes usar los botones.`);
+        alert(`¡Conectado exitosamente a ${name}!`);
         activeTab = 'remote';
         render();
       }
@@ -460,12 +456,12 @@
     function sendCommand(cmd) {
       const ip = localStorage.getItem('tv_ip');
       if (!ip) {
-        alert('Por favor, selecciona y vincula tu televisor primero desde el ícono de Ajustes (⚙️).');
+        alert('Por favor, selecciona tu televisor primero desde el menú de Ajustes (⚙️).');
         activeTab = 'settings';
         render();
         return;
       }
-      console.log(`Enviando comando ${cmd} al TV con IP ${ip}`);
+      console.log(`Enviando comando ${cmd} al TV ${ip}`);
     }
 
     window.onload = () => render();
