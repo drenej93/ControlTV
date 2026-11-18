@@ -464,15 +464,21 @@
     }
 
     function pairWithDevice(name, ip) {
-      const pin = prompt(`Para vincular con "${name}" (${ip}), ingresa el código PIN que aparece en tu televisor:`);
-      if (pin) {
-        selectedTv = `${name} (${ip})`;
-        localStorage.setItem('tv_name', selectedTv);
-        localStorage.setItem('tv_ip', ip);
-        alert(`¡Conectado exitosamente a ${name}!`);
-        activeTab = 'remote';
-        render();
+      if (window.AndroidTVBridge && window.AndroidTVBridge.requestPairingPin) {
+        window.AndroidTVBridge.requestPairingPin(ip);
       }
+
+      setTimeout(() => {
+        const pin = prompt(`Mira la pantalla de "${name}" (${ip}).\n\nIngresa el código PIN de 6 caracteres que aparece en tu televisor:`);
+        if (pin) {
+          selectedTv = `${name} (${ip})`;
+          localStorage.setItem('tv_name', selectedTv);
+          localStorage.setItem('tv_ip', ip);
+          alert(`¡Conectado exitosamente a ${name}!`);
+          activeTab = 'remote';
+          render();
+        }
+      }, 600);
     }
 
     function resetStoredTv() {
