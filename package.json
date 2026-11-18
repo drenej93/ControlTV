@@ -1,16 +1,15 @@
 {
   "name": "controltv",
   "version": "1.0.0",
-  "description": "",
+  "description": "Smart TV Remote App",
   "main": "index.js",
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "dependencies": {
-    "@capacitor/android": "^8.6.2",
-    "@capacitor/cli": "^8.6.2",
-    "@capacitor/core": "^8.6.2",
-    "cordova-plugin-zeroconf": "^1.4.2"
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/cli": "^6.0.0",
+    "@capacitor/core": "^6.0.0",
+    "@capacitor-community/zeroconf": "^6.0.0"
   }
 }
