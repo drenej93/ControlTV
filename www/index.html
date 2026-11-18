@@ -409,22 +409,23 @@
       if (isScanning) return;
       isScanning = true;
       discoveredDevices = [];
-      scanStatusMsg = 'Buscando Smart TVs en la red...';
+      scanStatusMsg = 'Escaneando red local...';
       render();
 
       const zeroconf = window.cordova && window.cordova.plugins && window.cordova.plugins.zeroconf;
 
       if (!zeroconf) {
         isScanning = false;
-        scanStatusMsg = 'Error: El módulo mDNS no está disponible.';
+        scanStatusMsg = 'Error: Módulo de descubrimiento no disponible.';
         render();
         return;
       }
 
-      // Escuchamos servicios de Google TV / Android TV
+      // Escuchamos servicios de Android TV / Google TV / Cast
       const servicesToWatch = [
         '_androidtvremote2._tcp.',
-        '_googlecast._tcp.'
+        '_googlecast._tcp.',
+        '_airplay._tcp.'
       ];
 
       servicesToWatch.forEach(type => {
@@ -434,7 +435,7 @@
             const ipv4 = srv.ipv4Addresses && srv.ipv4Addresses.find(ip => ip.startsWith('192.') || ip.startsWith('10.') || ip.startsWith('172.'));
             
             if (ipv4) {
-              const tvName = (srv.txtRecord && srv.txtRecord.fn) || srv.name || 'Smart TV';
+              const tvName = (srv.txtRecord && (srv.txtRecord.fn || srv.txtRecord.md)) || srv.name || 'Smart TV';
 
               if (!discoveredDevices.some(d => d.ip === ipv4)) {
                 discoveredDevices.push({
@@ -456,14 +457,14 @@
         });
         isScanning = false;
         if (discoveredDevices.length === 0) {
-          scanStatusMsg = 'No se encontró ningún Smart TV. Asegúrate de que el televisor esté encendido y conectado al mismo Wi-Fi.';
+          scanStatusMsg = 'No se encontró ningún Smart TV. Asegúrate de que el televisor esté encendido y en el mismo Wi-Fi.';
         }
         render();
       }, 8000);
     }
 
     function pairWithDevice(name, ip) {
-      const pin = prompt(`Para vincular con "${name}" (${ip}), ingresa el PIN que aparece en la pantalla de tu televisor:`);
+      const pin = prompt(`Para vincular con "${name}" (${ip}), ingresa el código PIN que aparece en tu televisor:`);
       if (pin) {
         selectedTv = `${name} (${ip})`;
         localStorage.setItem('tv_name', selectedTv);
